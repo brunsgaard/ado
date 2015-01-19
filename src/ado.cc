@@ -21,7 +21,7 @@
 #include "utils.h"
 
 bool TakeNode(const int n, const int k) {
-  static std::mt19937 mt();
+  static std::mt19937 mt(std::mt19937::default_seed);
   float r = static_cast<double>(mt()) / static_cast<double>(mt.max());
   return r <= pow(n, -1.0 / static_cast<double>(k));
 }
