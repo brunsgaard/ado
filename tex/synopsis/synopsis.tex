@@ -1,0 +1,80 @@
+\documentclass[10pt,a4paper,final,oneside,openany,article]{memoir}
+
+\input{prelude}
+
+\title{Approximate distance oracles in practice}
+\author{
+  Jonas Brunsgaard -- \texttt{jonas.brunsgaard@gmail.com} -- \texttt{msn378} \\
+  University of Copenhagen
+}
+
+\date{16th September 2013}
+
+\bibliography{bibliography}
+
+\begin{document}
+\maketitle
+
+\chapter{Project summary}
+Let $G = (V, E)$ be an undirected weighted graph with $|V| = n$ and
+$|E| = m$. Let $k > 1$ be an integer. Mikkel Thorup and Uri Zwick has
+presented approximate distance oracles\cite{tu}, a data structure of size
+$O(kn^{1+1/k})$ that can be preprocessed in $O(kmn^{1/k})$ expected time and
+have the ability to answer subsequent distance queries in $O(k)$ time.
+The approximate distance returned from the preprocessed data structure, denoted
+by $\hat{\delta}$, is of stretch at most $2k-1$, meaning $\delta(u,v)\leq
+\hat{\delta}(u,v)\leq(2k-1)\delta(u,v)$ where $u$ and $v$ are vertives in $G$
+
+The aim of this project is to show an implementation and run experiments over
+the approximate distance oracles algorithm. The experiments will focus on
+space consumption of the preprocessed data structure and the magnitude of the
+actual stretch. Results and will be discussed an compared to the theoretical
+limits of the algorithm. Experiments will be performed on real world data from
+the Stanford Large Network Dataset Collection.
+
+\chapter{Motivation}
+The project will deliver a qualified guess regarding the expected value of the
+stretch for graphs classes used in our experiments. This may be of interest to
+specific industries such as e.g. telecommunication.
+Furthermore the project will supply an open source reference implementation
+that can be used in future experiments regarding approximate distance oracles.
+
+\chapter{Problem statement}
+How much does the stretch and space consumption differ from the theoretical
+limits, when approximate distance oracles are applied to real world data sets?
+
+\chapter{Scope}
+Our experiments are limited to stretch and the size of the precomputed data
+structure.
+
+\chapter{Learning objectives}
+\begin{itemize}
+    \item Implement non-trivial graph algorithms.
+    \item Explain approximate distance oracles.
+    \item Prove properties of approximate distance oracles.
+    \item Argue about the quality of approximate distance oracles implementations.
+\end{itemize}
+
+\chapter{Tasks to complete}
+To finish this project the following tasks has to be completed. The week
+number indicates that a given task is the main focus that week.
+
+\begin{itemize}[leftmargin=2cm]
+    \item[week 39] Work with the article to understand approximate distance
+                   oracles.
+    \item[week 39] Write an implementation.
+    \item[week 40] Test implementation on smaller data sets and verify
+                   correctness of results.
+    \item[week 41] Write code that can determine the stretch and space
+                   consumption of the produced data structure.
+    \item[week 42] Improve implementation in regard to hashing, choice of SSSP
+                   algorithm, etc.
+    \item[week 43] Benchmark on graphs from Stanford Large Network Dataset
+                   Collection.
+    \item[week 45] Document the work performed in report.
+\end{itemize}
+
+\defbibheading{bibliography}{\chapter{Literature}}
+\printbibliography
+
+\end{document}

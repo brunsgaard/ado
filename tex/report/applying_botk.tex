@@ -1,0 +1,278 @@
+\chapter{Large-scale learning with bottom-$k$ sketches}
+
+The $k\times$minwise sketch turned out to be very useful for large-scale
+learning as described in \autoref{sec:appl_lsl}. This leads us to believe
+that we should be able to use bottom-$k$ sketches for this as well since
+the two methods are used for basically the same thing.
+
+\section{Advantages of bottom-$k$ over $k\times$minwise}\label{sec:adv}
+One reason we would like to use bottom-$k$ sketches for large-scale learning
+is that it has several advantages over the $k\times$minwise sketches.
+These are described below.
+
+The $k\times$minwise sketch carries less information than the bottom-$k$
+sketch. This is described in \cite{Cohen07} and the intuition is that it
+represents $k$ samples with replacement where as the bottom-$k$ sketch
+represents $k$ samples without replacement.
+
+A more problematic issue is that the hash functions needed for good minwise
+sketches are not leightweight tools. In theorem\autoref{thm:jac1} we assumed
+a truly random hash function. This is not realistic, so we need to look at
+some $(1\pm\varepsilon)$-minwise hash function as defined in Definition
+\autoref{def:minwise}. It is shown in \cite{Thorup10} that in order to get
+$(1\pm\varepsilon)$-hashing one needs $\Omega(\lg 1/\varepsilon)$-independent
+hash functions. It is shown in \cite{feigenblat12} that we can get away with
+$8$-independence if we use a slightly different definition. This is still
+not a very light-weight tool and clearly creates a bias in which elements
+we sample when creating the $k\times$minwise sketch. The problem with this
+bias is that it cannot be removed any number $k$ of repetitions. Using
+bottom-$k$ sketches it is shown in \cite{Thorup12} that this bias vanishes
+as $k$ increases. He also shows that bottom-$k$ sketches can be implemented
+in practice using $2$-independent hash functions. This result is somewhat
+surprising as the two approach are identical for $k=1$.
+
+Another important problem is the computational cost of $k\times$minwise
+sketches. When creating a $k\times$minwise sketch we need to calculate $k$
+hash values for every single element in the set. This is because we cannot
+know which elements will hash to the smallest values when applying a hash
+function to them. When creating a $b$-bit
+minwise sketch we also need to create the $O(2^b\cdot k)$ signature.
+The pseudocode in \autoref{pseudo:minwise} shows the general idea of creating
+a $b$-bit $k\times$minwise sketch. It is easy to see that the resulting
+time complexity is $O(k\cdot D + k\cdot 2^b)$. Note that the running time for
+the linear SVM does not depend on the amount of training points at all. The
+classification is a simple dot product of two $k\cdot2^b$-dimensional vectors,
+so as we use more training points the classification will get better, but
+the classification time will not grow. In practice we can get around
+the extra $k\cdot 2^b$ term by using a compressed vector to store the result
+as there will only be exactly $k$ $1$s in the sketch. Because the dictionary
+size $D$ might be very large compared to the actual data it is not fair to
+include it in the time complexity. We should therefore write the time
+complexity in terms of the input size $|V|$, where $V$ is the input vector.
+This gives us a complexity of $O(k\cdot |V|)$ if we use a compressed vector.
+
+\begin{figure}[htbp]
+\begin{codebox}
+    \Procname{$\proc{Create-Bbit-Kminwise-Sketch}(V, k, b)$}
+    \li Create new array $H$ of size $k$ to hold the minhashes
+    \li Initialize all entries of $H$ to $\infty$
+    \li Create vector $S$ of size $2^b\cdot k$ to hold the actual sketch.
+    \li Initialize $S$ to all zeroes
+    \li \For $i \gets 1$ \To $\attrib{V}{size}$
+    \li \Do
+            \For $j\gets 1$ \To $k$
+    \li     \Do
+                $val\gets \proc{hash}_j(V[i])$
+    \li         \If $val < H[j]$
+    \li         \Then
+                    $H[j]\gets val$
+                \End
+            \End
+        \End
+    \li \Comment Create the actual sketch
+    \li \For $i\gets 1$ \To $k$
+    \li \Do
+            $x \gets b$ lowest bits of $H[i]$
+    \li     Set the $x$th bit of the $i$th $2^b$ bits of $S$ to $1$
+        \End
+    \li \Return $S$
+\end{codebox}
+\caption{Pseudocode for creating a $b$-bit $k\times$minwise sketch. $V$ is
+         the input vector of size up to $D$. For each element in $V$ we create
+         $k$ hashes and store the minimum for each hash function. Lines $1$
+         to $9$ finds the minimum hash values and lines $11$ to $13$ creates
+         the actual sketch.}
+\label{pseudo:minwise}
+\end{figure}
+
+
+When creating a bottom-$k$ sketch we only deal with one hash function $h$.
+We therefore only need to calculate one hash value per element in the input
+vector. It is however not as easy to keep track of the $k$ smallest values
+as it is to keep track of only the smallest value. To do this efficiently we
+can use a priority queue to store the $k$ smallest elements so far, as we go
+through the input vector. Whenever a hash value is calculated it is pushed
+onto the priority queue and if this increases the size to $k+1$ we pop the
+largest element. This way the smallest $k$ values in the part of the vector
+examined so far will always be present in the priority queue. This procedure
+is outlined in the pseudocode of \autoref{pseudo:bottomk}. It is clear that
+this algorithm has time complexity $O(\lg k\cdot D)$ or $O(\lg k\cdot |V|)$ if
+we want to write it in terms of the size of the input vector $V$. In practice
+we could keep the sketch as a sorted array making the union and intersection
+operation of \autoref{eqn:botk1} linear time. This works because the sketch
+is not altered after it is created.
+
+\begin{figure}[htbp]
+\begin{codebox}
+    \Procname{$\proc{Create-BottomK-Sketch}(V, k)$}
+    \li Create a max priority queue $Q$
+    \li Create empty set $S$ to hold the actual sketch
+    \li \For $i\gets 1$ \To $\attrib{V}{size}$
+    \li \Do
+            $val \gets \proc{hash}(V[i])$
+    \li     $\attrib{Q}{\proc{push}}(val)$
+    \li     \If $\attrib{Q}{size} > k$
+    \li     \Then
+                $\attrib{Q}{\proc{pop}}()$
+            \End
+        \End
+    \li \While $Q$ not empty
+    \li \Do
+            $\attrib{S}{\proc{add}}(\attrib{Q}{top})$
+    \li     $\attrib{Q}{\proc{pop}}()$
+        \End
+    \li \Return $S$
+\end{codebox}
+\caption{Pseudocode for creating a bottom-$k$ sketch. $V$ is the input vector
+         of size up to $D$. The algorithm uses a max priority queue (max heap)
+         to keep track of the $k$ smallest hash values.}
+\label{pseudo:bottomk}
+\end{figure}
+
+From this discussion it is clear that the bottom-$k$ sketch should be both
+faster to create and exhibit less bias in theory.
+
+
+\section{Learning with bottom-$k$ sketches}
+Looking at the advantages of bottom-$k$ sketches should give us enough
+motivation to create a representation for bottom-$k$ sketches that allows us
+to use a linear SVM just like representation derived for $b$-bit
+$k\times$minwise sketches in \autoref{sec:appl_lsl}. Doing so does
+however turn out to be a rather difficult task (this is discussed more in
+\autoref{sec:botk_kernel}). This section therefore focuses mainly on using
+bottom-$k$ sketches with the $K$ Nearest Neighbors algorithm described in
+\autoref{sec:knn}. I compare my results with the linear SVM using
+$k\times$minwise sketches only. Comparing with a $K$-NN algorithm using
+$k\times$minwise sketches would be extremely one-sided as we can clearly see
+from the analysis in the previous section: Bottom-$k$ simply is better on
+(almost) all accounts.
+
+The first question we must ask ourselves is which ``version'' of the $K$-NN
+algorithm we should use. The highly nonlinear nature of the bottom-$k$
+sketches makes it difficult to use any optimizations on $K$-NN to provide
+sublinear classification time. I originally implemented my experiments using
+the SHARK machine learning library \cite{Igel08}. I did this using the KHCTree
+implemented in SHARK to try and get a sublinear classification time, but
+instead the classification time exploded and was way higher than a simple
+naive $K$-NN implementation. Thus the version of choice is the very simple
+naive implementation, which compares each input element to every training
+element and makes its choice based on the labels of the $K$ nearest.
+
+The second question we must ask ourselves is whether it will ever make sense
+to use a naive $K$-NN algorithm over a linear SVM. This from a perspective
+of performance in both classification accuracy and speed. It is difficult to
+argue about classification accuracy of $K$-NN versus the linear SVM algorithm
+from a theoretical perspective. Experiments do however show that support vector
+machines generally do better than $K$-NN \cite{Meyer03}. I therefore want
+to see emipirical results to judge which one is better in this case. When
+considering speed I will only look at classification time. As described in
+\autoref{sec:knn} the $K$-NN algorithm has no real training time in the naive
+version and \cite{Li11} showed that the training time for the linear SVM was
+very short (less than $100$ seconds for all their test settings). Therefore I
+think it is okay to disregard training time as it is not significant enough
+to make it unattractive to the vast majority of application scenarios. Below,
+I present some analysis of why it makes sense to look at a $K$-NN version
+using bottom-$k$ sketches over a linear SVM with $k\times$minwise sketches in
+some situations. Note first that Li et al.~did not look at the time it takes
+to create the $k\times$minwise sketches in their article \cite{Li11}. I do
+however think that this is a very important part, as it has to be done for
+each input vector before we can classify it.
+
+Combining the discussion from \autoref{sec:adv} on sketch creation and
+\autoref{sec:ml} we can see that the time complexity of classifying a single
+input point using $k\times$minwise and linear SVM is
+\begin{equation}
+    O(k\cdot |V| + k) = O(k\cdot |V|)\ ,
+\end{equation}
+with $O(k\cdot |V|)$ for creating the sketch and $O(k)$ for
+classification (a single dot product). If we assume $K$ is some low constant
+(like $3$ or $5$) classifying using the naive $K$-NN is
+\begin{equation}
+    O(\lg k\cdot |V| + n\cdot k)\ ,
+\end{equation}
+with $O(\lg k\cdot |V|)$ for creating the sketch and $O(n\cdot k)$
+for classification, where $n$ is the amount of training data.
+
+From these time complexities it is clear that two factors determine the
+speed of the $K$-NN approach compared to the linear SVM approach. The amount of
+training data $n$ and the size (and thus precision) of the sketch $k$.
+The dominating factor here is the ratio of $|V|$ to $n$ -- that is; if we
+have little training data compared to the number of features in the input
+vectors, then we expect the $K$-NN approach to be faster than the linear SVM
+simply because the parsing is so much faster with the bottom-$k$ sketches.
+Also if the values of $|V|$ is sufficiently larger than $n$ and we wish very
+low variance in the quality of the estimation (higher value for $k$), then
+the $K$-NN approach should be faster as well. This last claim has one big
+problem though. The accuracy of the two methods is hard to compare, so even with
+higher $k$ the linear SVM might be much more accurate than the $K$-NN. This means
+that a $k$ value for the linear SVM does not give the same accuracy as a $k$
+value for $K$-NN. The bias of the $k\times$minwise sketch furthers this
+discrepancy.
+
+A good example of an application where we would expect this approach to do
+well is classification with hand-labeled data. In this case the set of
+training data will be small by nature, as hand-labeling is a slow and
+demanding process.
+
+
+\section{Kernel function using bottom-$k$ sketches}\label{sec:botk_kernel}
+
+It is clear that $K$-NN is a very slow classifier compared to linear support
+vector machines in the general case, so our ultimate goal must be to create a
+linear (inner product) kernel that uses bottom-$k$ sketches, which we would
+expect to beat the method by Li et al.~in all cases.
+
+With $k\times$minwise sketches we compare elements pairwise -- that is the
+$\min(h_1(A))$ is compared to $\min(h_1(B))$ and no other elements. This makes
+it easy to see that we could represent minwise sketches as vectors where
+the resemblance estimator is a simple dot-product. With bottom-$k$ sketches
+the extra $S(A\cup B)$ term of \autoref{eqn:botk1} makes it a lot harder to
+see if the resemblance even represents a kernel function and much less how to
+make a linear kernel from this. I will address the question of whether the
+resemblance estimation using bottom-$k$ sketches is a kernel function, but a
+full proof of this is outside the scope of this report and has to my
+knowledge not been done yet.
+
+We have seen in \autoref{sec:svm} that it is sufficient and necessary to
+show that the kernel matrix is positive semidefinite, so we wish to show
+that given sets $A_1, A_2, \ldots, A_n$ the matrix
+\begin{equation}
+    M =
+    \begin{bmatrix}
+        \frac{|S(A_1) \cap S(A_1) \cap S(A_1\cup A_1)|}{k} & \cdots &
+        \frac{|S(A_1)\cap S(A_n)\cap S(A_1\cup A_n)|}{k} \\
+        \vdots & \ddots & \vdots \\
+        \frac{|S(A_n) \cap S(A_1) \cap S(A_n\cup A_1)|}{k} & \cdots &
+        \frac{|S(A_n)\cap S(A_n)\cap S(A_n\cup A_n)|}{k} \\
+    \end{bmatrix}
+\end{equation}
+is positive semidefinite. It is clear to see that the matrix is
+symmetric because of the symmetry of set union and intersection. We also
+get from \cite{Li11} that the matrix is positive semidefinite when $k=1$.
+In this case the bottom-$k$ method is the exact same as the $k\times$minwise
+method, which we know to be a kernel function.
+
+If we look at some special cases for $n$ we can use the determinants to see
+whether $M$ is positive semidefinite or not: If all the leading principal
+minors have positive or $0$ determinant, then $M$ is positive semidefinite. If
+we use $n=1$ it is trivial because $M_{11} = 1$ always. For $n=2$ we can look
+at the determinant
+\begin{equation}
+    |M| = M_{11}M_{22} - M_{12}M_{21} = 1 - M_{12}M_{21} \ge 1 - 1 = 0\ ,
+\end{equation}
+because all entries in the matrix are between $0$ and $1$ and all
+diagonal elements are $1$. Already for $n=3$ however it becomes much more
+difficult to show whether $M$ is positive semidefinite or not.
+
+I tried to do some experiments in Matlab to get a counter-example or to gain
+confidence that $M$ indeed is positive semidefinite in the general case. Using
+$k=20$, I generated $200,000$ matrices with $n=5$ and $200,000$ with $n=10$.
+All of these were positive semidefinite. Each matrix was generated by creating
+$n$ sets of $1000$ elements between $1$ and $3000$ (to get some collisions).
+I then created the matrix according to these sets using the identity as hash
+function, as the hash function just permutes the elements and does not have
+an impact on whether the matrix is positive definite or not. With all these
+$400,000$ random examples being positive semidefinite, I am confident that the
+bottom-$k$ actually is a kernel function. Even if it is, it will be difficult
+to create a linear kernel using these sketches unless we simply guess a vector
+representation like Li et al. did in \cite{Li11}.

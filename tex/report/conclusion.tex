@@ -1,0 +1,35 @@
+\chapter{Conclusion}
+\label{sec:conclusion}
+
+Based on this report I can conclude that making an efficient implementation
+of approximate distance oracles, capable of handling data sets with millions
+of nodes, requires the use of heavily performance optimized language, memory
+efficient data structures and concurrent programming, where the algorithm
+allows for it.
+
+In this report I have provided empirical data that suggests the average actual
+stretch of $k=2$ approximate distance oracles data structures is considerably
+lower than the worst case stretch of $3$. I have tested the actual stretch
+on two internet topologies and three road network and the maximum value for
+$\bar{s}$ I have been able to produce is $1.56$. The internet topologies
+domain has a combined mean of $1.48$ and the road networks $1.07$, which I
+find to be a fine overall result.
+
+My experiments also suggest that the average actual stretch produced by
+approximate distance oracles on graphs within the same domain is very similar.
+Also the distribution of the graph stretches seems related for the results
+generated within the domain.
+
+For graphs in the domain of internet topologies, I have observed that both
+data sets used in the experiments produce results in the same range and their
+distribution of the produced stretches are similar. So I find that $\bar{s}
+\approx 1.5$ is a reasonable indicator for the average actual stretch found in
+internet topologies.
+
+Furthermore, the experiments run over road networks for California, Texas and
+Pennsylvania produce exciting results. Not only are the distributions and
+averages of the actual stretches produced from the created data structures
+more or less identical. The mean value is found to be approximately $1.1$,
+which I find impressive. This indicates that graphs from this domain possess
+similar properties that makes approximate distance oracles produce very good
+estimates.

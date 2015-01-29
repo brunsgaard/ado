@@ -1,0 +1,67 @@
+\chapter{Average stretch of estimates}
+From \autoref{eq:stretchinterval} we know approximate distance oracles
+produces results with a stretch guarantee. That is a worst-case multiplicative
+factor increase of path length between a pair of vertices. But this worst case
+guarantee may differ substantial from the average multiplicative factor on the
+produces paths. For a single shortest path query the stretch of the result is
+denoted $\hat{s}$ and is as the fraction of the exact shortest path.
+\begin{equation}
+    \hat{s}(u,v) = \frac{\hat{\delta}(u,v)}{\delta(u,v)}
+\end{equation}
+Thus there will also exists an average such that
+\begin{equation}
+    \bar{s} = \frac{\sum\limits_{(u,v) \in V \times V} \hat{s}(u,v) }{|V|^2}
+\end{equation}
+
+We will try to dertermine $\bar{s}$ through experiments over data from
+Stanford Large Network Dataset Collection.
+
+Graphs can have many properties and two graphs may not be suited for using the
+algorithm. We have choosen two types of graphs where applications have the need
+to answer fast.
+
+
+
+
+
+\subsection*{Classes of graph we will test}
+I have choosen some different areas of graph to see is the results differ.
+Roadnet and internet topologies
+
+\begin{description}
+  \item[Internet topologies] \hfill
+        \begin{description}
+        \item[Skitter] \hfill \\
+                Internet topology graph. From traceroutes run daily in 2005 -
+                \url{http://www.caida.org/tools/measurement/skitter}. From several
+                scattered sources to million destinations. 1.7 million nodes, 11
+                million edges.
+
+        \item[AS-733] \hfill \\
+                The graph of routers comprising the Internet can be organized into
+                sub-graphs called Autonomous Systems (AS). Each AS exchanges traffic flows
+                with some neighbors (peers). We can construct a communication network of
+                who-talks-to- whom from the BGP (Border Gateway Protocol) logs.
+        \end{description}
+  \item[Road networks] \hfill
+        \begin{description}
+        \item[California] \hfill \\
+                A road network of California. Intersections and endpoints are represented
+                by nodes and the roads connecting these intersections or road endpoints are
+                represented by undirected edges.
+
+        \item[Texas] \hfill \\
+                A road network of Texas. Intersections and endpoints are represented
+                by nodes and the roads connecting these intersections or road endpoints are
+                represented by undirected edges.
+
+        \item[Pennsylvania] \hfill \\
+                A road network of Pennsylvania. Intersections and endpoints are represented
+                by nodes and the roads connecting these intersections or road endpoints are
+                represented by undirected edges.
+    
+        \end{description}
+\end{description}
+
+The theory of determining the average stretch from experiment is rather
+trivial but to sample results data I implemented approximate distance oracles.

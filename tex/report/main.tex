@@ -1,0 +1,128 @@
+\documentclass[a4paper,final]{memoir}
+
+% Language and encoding
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[protrusion=true,expansion=true]{microtype} % better typography
+
+% Math
+\usepackage{amsmath,amssymb,amsfonts,amsthm,latexsym}
+
+
+\newtheorem{thm}{Theorem}[chapter]
+\theoremstyle{definition}
+
+%\newtheoremstyle{mydefstyle}
+%  {3\topsep} % Space above
+%  {3\topsep} % Space below
+%  {} % Body font
+%  {} % Indent amount
+%  {\bfseries} % Theorem head font
+%  {} % Punctuation after theorem head
+%  {.5em} % Space after theorem head
+%  {} % Theorem head spec (can be left empty, meaning `normal')
+%
+%\theoremstyle{mydefstyle}
+\newtheorem{defn}{Definition}[chapter]
+%\newtheorem{examp}[thm]{Example}
+
+\newcommand{\bbN}{\mathbb N} %the natural numbers
+\newcommand{\bbZ}{\mathbb Z} %the integers
+\newcommand{\bbQ}{\mathbb Q} %the rational numbers
+\newcommand{\bbR}{\mathbb R} %the real numbers
+\newcommand{\bbC}{\mathbb C} %the complex numbers
+
+%\providecommand*{\listingautorefname}{Listing}
+
+% Graphic stuff
+\usepackage[pdftex]{graphicx}
+\usepackage[usenames,dvipsnames,table]{xcolor}
+\definecolor{shade}{RGB}{245,245,245}
+\usepackage[pdftex,colorlinks=true]{hyperref}
+\hypersetup
+{
+    bookmarksnumbered,
+    linkcolor=RoyalBlue,
+    anchorcolor=RoyalBlue,
+    citecolor=RoyalBlue,
+    urlcolor=RoyalBlue,
+    pdfstartview={FitV},
+    pdfdisplaydoctitle
+}
+\usepackage{pgfplots}
+
+% Tables
+\usepackage{booktabs}
+\usepackage[hang,small,bf]{caption}
+
+% Debug, etc.
+\usepackage{todonotes}
+
+% Numbering
+\setsecnumdepth{subsection}
+\maxtocdepth{subsection}
+\numberwithin{equation}{chapter}
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+
+% Computer science stuff
+\usepackage{clrscode3e}
+\usepackage{verbatim}
+\newcommand{\mono}[1]{{\ttfamily#1}}
+\usepackage{listings}
+\lstset
+{
+    tabsize=2,
+    numbers=left,
+    breaklines=true,
+    backgroundcolor=\color{shade},
+    framexleftmargin=0.05in,
+    basicstyle=\ttfamily\small,
+    numberstyle=\tiny,
+    keywordstyle=\color{RoyalBlue},
+    stringstyle=\color{Maroon},
+    commentstyle=\color{ForestGreen}
+}
+
+
+% Document meta stuff
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}}
+\makeevenfoot{plain}{}{}{\thepage}
+\makeoddfoot{plain}{}{}{\thepage}
+
+\begin{document}
+
+\frontmatter
+
+\include{title}
+%\thispagestyle{empty}
+
+\input{abstract}
+
+\newpage
+\tableofcontents
+
+\pagestyle{Ruled}
+\chapterstyle{hangnum}
+\mainmatter
+
+\newpage
+\input{introduction}
+\newpage
+\input{background}
+\newpage
+%\input{average_stretch}
+%\newpage
+\input{implementation}
+\newpage
+\input{experiments}
+\newpage
+\input{conclusion}
+
+\newpage
+\bibliographystyle{amsplain}
+\bibliography{../../references}
+
+
+\end{document}

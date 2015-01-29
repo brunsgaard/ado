@@ -1,0 +1,25 @@
+\begin{abstract}
+Approximate distance oracle is a data structure presented by Thorup and
+Zwick\cite{tu} that allows for approximate shortest path queries in
+constant time on undirected connected graphs with positive edge weights.
+The approximated distances is said to be of \emph{Stretch-3}, if the data
+structure is constructed in such a way that the produced estimates, is at most
+a factor three longer than the actual shortest path.
+
+In this report I look at the actual stretches produces by \emph{Stretch-3}
+approximate distance oracles. Through experiments I attempt to indicate
+a value of the expected actual stretch, in graphs representing internet
+topologies and road networks. To perform the experiments, a high performance
+C++ implementation of approximate distance oracles has been developed and is
+discussed in the report.
+
+Based on experiments over internet topologies from Stanford Large Network
+Data\cite{snapnets} collection. I find that the tested graphs on average produce stretches
+of $\sim1.5$. When conducting the experiments over road networks from California,
+Texas and Pennsylvania the average actual stretch is $\sim1.1$. I find the graphs
+of each domain to produce very similar results and the distribution of the
+actual stretches produced is also a like.
+
+Thus I find these values to be reasonable indicators for the average actual
+stretch for their domains.
+\end{abstract}
